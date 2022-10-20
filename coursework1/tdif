@@ -1,0 +1,23 @@
+    lines = queries.readlines()
+    query_terms = []
+    for line in lines:
+        query_words = re.sub(r"[^\w]+", " ", line).lower().strip("\n")
+        words = filter(lambda x: x not in stopwords and x != "", query_words.split(" "))
+        query_term = [stem(word) for word in words]
+        query_terms.append(query_term)
+    #store tfidf weighting in dictionary
+    doc_dic = {}
+    for query_num in range(len(query_terms)):
+        doc_dic[query_num] = {}
+        for word in query_terms[query_num][1:]:
+            doc_num = query_num + 1
+            list_docs = query_request(word)
+            #document frequency
+            df = len(term_dic[word])
+            for doc in list_docs:
+                if doc not in doc_dic[query_num]:
+                    doc_dic[query_num][doc] = 0
+                #term frequency
+                tf = len(term_dic[word][str(doc)])
+                w = (1 + math.log10(tf)) * math.log10(total_num / df)
+                doc_dic[query_num][doc] += w
